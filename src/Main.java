@@ -1,131 +1,120 @@
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.nio.charset.Charset;
+import java.lang.reflect.*;
 import java.util.*;
 
-public class Main{
+public class Main {
 
-	public static void main(String[] args)throws InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-		String s = null;
-		
-		
-		
-		
+	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
+			ClassNotFoundException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 		List<String> list = new ArrayList<String>();
 		list.add("GGG");
-    	list.add("HHH");
-    	Man man = new Man("Sasha",22,list);
-    	Man m = deepCopy(man);
-   	    List<Man> listman = new ArrayList<Man>();
-   	    listman.add(man);
-   	    listman.add(m);
-   	// System.out.println("djn nen");
-    	System.out.println(deepCopy(listman));
-       
-			}
+		list.add("HHH");
+		Man man = new Man("Sasha", 22, list);
+		Man m = deepCopy(man);
+		List<Man> listman = new ArrayList<Man>();
+		listman.add(man);
+		listman.add(m);
 
+		System.out.println(deepCopy(listman));
 
-	
-	public static <T> T deepCopy(T o){
+	}
+
+	public static <T> T deepCopy(T o) {
 		T copyObj = null;
-		
+
 		Class cl = o.getClass();
-	
- /* Если копируемый объект примитиву или потомок нумбера стринга характера или булеана*/
-		if((cl.isPrimitive()
-				||(o instanceof Number)
-				||(o instanceof String)
-				||(o instanceof Character)
-				||(o instanceof Boolean)))
-// В этом случае мы получаем его конструктор и создаем его вот таким вот способом:
-		{try {
-/*У всех классов оберток примитивов есть, кроме характер, есть конструктор с аргументом String*/			
-			copyObj = (T) cl.getDeclaredConstructor(String.class).newInstance(o.toString());
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}}
-/*Отдельно обработаю копирование коллекий*/		
-		else if(o instanceof Collection) {
-		try {
-			copyObj = (T) o.getClass().getDeclaredConstructor().newInstance();
-			List list = ArrayList.class.getDeclaredConstructor(Collection.class).newInstance(o);
-			Method getSizeF = o.getClass().getDeclaredMethod("size");
-			Method addCol = copyObj.getClass().getDeclaredMethod("add", Object.class);
-			int size = (int) getSizeF.invoke(o);		
-			for(int i=0;i<list.size();i++) {
-			addCol.invoke(copyObj, deepCopy(list.get(i)));}
-			
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {	
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {	
-			e.printStackTrace();
-		} catch (InstantiationException e) {	
-			e.printStackTrace();
+
+		/*
+		 * Р•СЃР»Рё РєРѕРїРёСЂСѓРµРјС‹Р№ РѕР±СЉРµРєС‚ РїСЂРёРјРёС‚РёРІСѓ РёР»Рё РїРѕС‚РѕРјРѕРє РЅСѓРјР±РµСЂР° СЃС‚СЂРёРЅРіР° С…Р°СЂР°РєС‚РµСЂР° РёР»Рё
+		 * Р±СѓР»РµР°РЅР°
+		 */
+		if ((cl.isPrimitive() || (o instanceof Number) || (o instanceof String) || (o instanceof Character)
+				|| (o instanceof Boolean)))
+// Р’ СЌС‚РѕРј СЃР»СѓС‡Р°Рµ РјС‹ РїРѕР»СѓС‡Р°РµРј РµРіРѕ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ Рё СЃРѕР·РґР°РµРј РµРіРѕ РІРѕС‚ С‚Р°РєРёРј РІРѕС‚ СЃРїРѕСЃРѕР±РѕРј:
+		{
+			try {
+				/*
+				 * РЈ РІСЃРµС… РєР»Р°СЃСЃРѕРІ РѕР±РµСЂС‚РѕРє РїСЂРёРјРёС‚РёРІРѕРІ РµСЃС‚СЊ, РєСЂРѕРјРµ С…Р°СЂР°РєС‚РµСЂ, РµСЃС‚СЊ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ
+				 * Р°СЂРіСѓРјРµРЅС‚РѕРј String
+				 */
+				copyObj = (T) cl.getDeclaredConstructor(String.class).newInstance(o.toString());
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		/* РћС‚РґРµР»СЊРЅРѕ РѕР±СЂР°Р±РѕС‚Р°СЋ РєРѕРїРёСЂРѕРІР°РЅРёРµ РєРѕР»Р»РµРєРёР№ */
+		else if (o instanceof Collection) {
+			try {
+				copyObj = (T) o.getClass().getDeclaredConstructor().newInstance();
+				List list = ArrayList.class.getDeclaredConstructor(Collection.class).newInstance(o);
+				Method getSizeF = o.getClass().getDeclaredMethod("size");
+				Method addCol = copyObj.getClass().getDeclaredMethod("add", Object.class);
+				int size = (int) getSizeF.invoke(o);
+				for (int i = 0; i < list.size(); i++) {
+					addCol.invoke(copyObj, deepCopy(list.get(i)));
+				}
+
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			}
 		}
-/*Иначе если объект не относится к одному из вышеперечисленных классов и примитивов
- в таком случае мы получаем конструктор класса и создаем объект, если есть конструктор по умолчанию то берем его если нет то берем
- последний из полученного массива конструкторов и с помощью метода returnVar() добавляем туда нулевые параметры */		
-		
+		/*
+		 * РРЅР°С‡Рµ РµСЃР»Рё РѕР±СЉРµРєС‚ РЅРµ РѕС‚РЅРѕСЃРёС‚СЃСЏ Рє РѕРґРЅРѕРјСѓ РёР· РІС‹С€РµРїРµСЂРµС‡РёСЃР»РµРЅРЅС‹С… РєР»Р°СЃСЃРѕРІ Рё
+		 * РїСЂРёРјРёС‚РёРІРѕРІ РІ С‚Р°РєРѕРј СЃР»СѓС‡Р°Рµ РјС‹ РїРѕР»СѓС‡Р°РµРј РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєР»Р°СЃСЃР° Рё СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚,
+		 * РµСЃР»Рё РµСЃС‚СЊ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ С‚Рѕ Р±РµСЂРµРј РµРіРѕ РµСЃР»Рё РЅРµС‚ С‚Рѕ Р±РµСЂРµРј РїРѕСЃР»РµРґРЅРёР№
+		 * РёР· РїРѕР»СѓС‡РµРЅРЅРѕРіРѕ РјР°СЃСЃРёРІР° РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂРѕРІ Рё СЃ РїРѕРјРѕС‰СЊСЋ РјРµС‚РѕРґР° returnVar() РґРѕР±Р°РІР»СЏРµРј
+		 * С‚СѓРґР° РЅСѓР»РµРІС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
+		 */
+
 		else {
-			Constructor[] arrCons = cl.getDeclaredConstructors();// получаем массив конструкторов класса
-			ArrayList<Class[]> listAr = new ArrayList<Class[]>();// создаем список массивов типа Class, для того что бы
-																	// вносить туда массивы параметров каждого
-																	// конструктора
-			for (Constructor f : arrCons) {// проходимся по массиву конструкторов
+			Constructor[] arrCons = cl.getDeclaredConstructors();// РїРѕР»СѓС‡Р°РµРј РјР°СЃСЃРёРІ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂРѕРІ РєР»Р°СЃСЃР°
+			ArrayList<Class[]> listAr = new ArrayList<Class[]>();// СЃРѕР·РґР°РµРј СЃРїРёСЃРѕРє РјР°СЃСЃРёРІРѕРІ С‚РёРїР° Class, РґР»СЏ С‚РѕРіРѕ С‡С‚Рѕ Р±С‹
+																	// РІРЅРѕСЃРёС‚СЊ С‚СѓРґР° РјР°СЃСЃРёРІС‹ РїР°СЂР°РјРµС‚СЂРѕРІ РєР°Р¶РґРѕРіРѕ
+																	// РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂР°
+			for (Constructor f : arrCons) {// РїСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РјР°СЃСЃРёРІСѓ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂРѕРІ
 				listAr.add(f.getParameterTypes());
-			} // получаем и вносим в список listAr массивы типов параметров
+			} // РїРѕР»СѓС‡Р°РµРј Рё РІРЅРѕСЃРёРј РІ СЃРїРёСЃРѕРє listAr РјР°СЃСЃРёРІС‹ С‚РёРїРѕРІ РїР°СЂР°РјРµС‚СЂРѕРІ
 			Class[] parConst = listAr.get(listAr.size() - 1);
 			try {
 				for (int i = 0; i < listAr.size(); i++) {
 					if (listAr.get(i).length == 0) {
 						parConst = listAr.get(i);
 					}
-				} // конец фор
+				} // РєРѕРЅРµС† С„РѕСЂ
 				if (parConst.length == 0)
 					copyObj = (T) cl.newInstance();
 				else {
 					Constructor cons = cl.getDeclaredConstructor(parConst);
 					Object[] valueForC = new Object[parConst.length];
 					for (int i = 0; i < parConst.length; i++) {
-						valueForC[i] = returnVar(parConst[i]);// возвращаю в массив значения по типу параметров
-																// конструктора
+						valueForC[i] = returnVar(parConst[i]);// РІРѕР·РІСЂР°С‰Р°СЋ РІ РјР°СЃСЃРёРІ Р·РЅР°С‡РµРЅРёСЏ РїРѕ С‚РёРїСѓ РїР°СЂР°РјРµС‚СЂРѕРІ
+																// РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂР°
 					}
 
 					copyObj = (T) cons.newInstance(valueForC);
-					
-				} // конец иф елзе
-/*Получаем список полей класса присваиваем и создаем для каждого поля новый экземпляр его класса */				
-		Field[] fields = cl.getDeclaredFields();
-		for(Field f:fields) {
-			f.setAccessible(true);
-			f.set(copyObj,deepCopy(f.get(o)));}
-		
+
+				} // РєРѕРЅРµС† РёС„ РµР»Р·Рµ
+				/*
+				 * РџРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє РїРѕР»РµР№ РєР»Р°СЃСЃР° РїСЂРёСЃРІР°РёРІР°РµРј Рё СЃРѕР·РґР°РµРј РґР»СЏ РєР°Р¶РґРѕРіРѕ РїРѕР»СЏ РЅРѕРІС‹Р№
+				 * СЌРєР·РµРјРїР»СЏСЂ РµРіРѕ РєР»Р°СЃСЃР°
+				 */
+				Field[] fields = cl.getDeclaredFields();
+				for (Field f : fields) {
+					f.setAccessible(true);
+					f.set(copyObj, deepCopy(f.get(o)));
+				}
+
 			} catch (NoSuchMethodException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -136,9 +125,9 @@ public class Main{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} // КОНЕЦ ЕЛЗЕ ДЛЯ СОЗДАНИЯ КОПИИ ОБЪЕКТА
+		} // РљРћРќР•Р¦ Р•Р›Р—Р• Р”Р›РЇ РЎРћР—Р”РђРќРРЇ РљРћРџРР РћР‘РЄР•РљРўРђ
 		return copyObj;
-	}// конец метода deepcopy
+	}// РєРѕРЅРµС† РјРµС‚РѕРґР° deepcopy
 
 	@SuppressWarnings("rawtypes")
 	public static Object returnVar(Class o)
@@ -150,15 +139,12 @@ public class Main{
 				b = false;
 			else
 				b = 0;
-		} // Проверяем если это примитив то инииализируем нулем, если только это не
-			// булеан, а если булеан тогда инициализируем значанием
-			// false(T)o.getClass().getDeclaredConstructor(o.getClass()).newInstance(0);
+		} // РџСЂРѕРІРµСЂСЏРµРј РµСЃР»Рё СЌС‚Рѕ РїСЂРёРјРёС‚РёРІ С‚Рѕ РёРЅРёРёР°Р»РёР·РёСЂСѓРµРј РЅСѓР»РµРј, РµСЃР»Рё С‚РѕР»СЊРєРѕ СЌС‚Рѕ РЅРµ
+			// Р±СѓР»РµР°РЅ, Р° РµСЃР»Рё Р±СѓР»РµР°РЅ С‚РѕРіРґР° РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј Р·РЅР°С‡Р°РЅРёРµРј
+
 		else
-			b = null;// new Object();
-		return b;}
-	// for(int i = 0;i<parCons.length;i++)returnVar(parCons[i]);
-	
-	
-	
-	
+			b = null;
+		return b;
+	}
+
 }
